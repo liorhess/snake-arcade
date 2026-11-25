@@ -179,7 +179,7 @@
 
         if (s.status === "Ready") {
             overlayTitle.textContent = "Ready to Play";
-            overlayMessage.textContent = "Press Start Game or any Arrow / WASD key to begin.";
+            overlayMessage.textContent = "Press Start Game, use Arrow / WASD keys, or swipe on the board to begin.";
             overlayActionBtn.textContent = "Start Game";
         } else if (s.status === "Paused") {
             overlayTitle.textContent = "Game Paused";
@@ -426,13 +426,24 @@
         });
     }
 
+    function isOppositeDirection(a, b) {
+        return (a === "Up" && b === "Down")
+            || (a === "Down" && b === "Up")
+            || (a === "Left" && b === "Right")
+            || (a === "Right" && b === "Left");
+    }
+
     function queueDirection(dir) {
         if (!state) {
             return;
         }
 
         if (state.status === "Ready") {
-            startGame(dir);
+            if (isOppositeDirection("Right", dir)) {
+                startGame();
+            } else {
+                startGame(dir);
+            }
             return;
         }
 
@@ -441,8 +452,11 @@
         }
 
         if (pendingDirections.length < 3) {
-            var last = pendingDirections.length > 0 ? pendingDirections[pendingDirections.length - 1] : null;
-            if (last !== dir) {
+            var referenceDir = pendingDirections.length > 0
+                ? pendingDirections[pendingDirections.length - 1]
+                : state.direction;
+
+            if (dir !== referenceDir && !isOppositeDirection(referenceDir, dir)) {
                 pendingDirections.push(dir);
             }
         }
@@ -504,6 +518,75 @@
             handleOverlayAction();
         }
     });
+
+    // Touch swipe gesture support on the game canvas
+    var touchStartX = null;
+    var touchStartY = null;
+    var activeTouchId = null;
+    var MIN_SWIPE_DISTANCE = 24;
+
+    function resetTouchTracking() {
+        touchStartX = null;
+        touchStartY = null;
+        activeTouchId = null;
+    }
+
+    canvas.addEventListener("touchstart", function (e) {
+        if (!e.touches || e.touches.length !== 1) {
+            resetTouchTracking();
+            return;
+        }
+
+        e.preventDefault();
+        var touch = e.touches[0];
+        activeTouchId = touch.identifier;
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", function (e) {
+        if (activeTouchId !== null) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", function (e) {
+        if (activeTouchId === null || touchStartX === null || touchStartY === null) {
+            return;
+        }
+
+        var endedTouch = null;
+        for (var i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === activeTouchId) {
+                endedTouch = e.changedTouches[i];
+                break;
+            }
+        }
+
+        if (!endedTouch) {
+            return;
+        }
+
+        e.preventDefault();
+        var dx = endedTouch.clientX - touchStartX;
+        var dy = endedTouch.clientY - touchStartY;
+        var absX = Math.abs(dx);
+        var absY = Math.abs(dy);
+
+        resetTouchTracking();
+
+        if (Math.max(absX, absY) < MIN_SWIPE_DISTANCE) {
+            return;
+        }
+
+        var swipeDir = absX >= absY
+            ? (dx > 0 ? "Right" : "Left")
+            : (dy > 0 ? "Down" : "Up");
+
+        queueDirection(swipeDir);
+    }, { passive: false });
+
+    canvas.addEventListener("touchcancel", resetTouchTracking, { passive: true });
 
     window.SnakeApp = {
         startGame: startGame,

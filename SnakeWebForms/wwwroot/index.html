@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Arcade — ASP.NET Core</title>
+    <link href="/css/site.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="brand">
+                <span class="brand-badge">ASP.NET CORE</span>
+                <h1>Snake Arcade</h1>
+            </div>
+            <div class="hud-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Score</span>
+                    <span id="lblScore" class="stat-value accent-green">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Best</span>
+                    <span id="lblHighScore" class="stat-value accent-gold">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Apples</span>
+                    <span id="lblApples" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Difficulty</span>
+                    <span id="lblSpeed" class="stat-value accent-cyan">Normal</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-grid">
+            <section class="board-panel">
+                <div class="canvas-frame">
+                    <canvas id="snakeCanvas" width="520" height="520" aria-label="Snake game board"></canvas>
+                    <div id="boardOverlay" class="board-overlay">
+                        <div class="overlay-card">
+                            <h2 id="overlayTitle">Ready to Play</h2>
+                            <p id="overlayMessage">Use Arrow Keys or WASD to move. Eat apples to grow and watch for Golden Apples every 5th apple!</p>
+                            <button type="button" id="overlayActionBtn" class="btn btn-primary" onclick="SnakeApp.handleOverlayAction();">Start Game</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="status-bar">
+                    <span id="statusDot" class="status-dot ready"></span>
+                    <span id="statusText" class="status-text">Press Start Game or an arrow key to play.</span>
+                    <button type="button" id="btnMute" class="btn-icon" onclick="SnakeApp.toggleMute();" title="Toggle Sound">🔊</button>
+                </div>
+
+                <div class="controls-row">
+                    <div class="dpad" aria-label="Directional controls">
+                        <button type="button" class="dpad-btn up" onclick="SnakeApp.queueDirection('Up');" title="Up">▲</button>
+                        <button type="button" class="dpad-btn left" onclick="SnakeApp.queueDirection('Left');" title="Left">◀</button>
+                        <button type="button" class="dpad-btn down" onclick="SnakeApp.queueDirection('Down');" title="Down">▼</button>
+                        <button type="button" class="dpad-btn right" onclick="SnakeApp.queueDirection('Right');" title="Right">▶</button>
+                    </div>
+                    <div class="key-hints">
+                        <div><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</div>
+                        <div><kbd>Space</kbd> Pause / Resume &nbsp;·&nbsp; <kbd>Enter</kbd> New Game</div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="side-panel">
+                <div class="panel-card">
+                    <h2>Game Controls</h2>
+                    <div class="form-group">
+                        <label for="txtPlayerName">Player Name</label>
+                        <input id="txtPlayerName" type="text" class="input-control" maxlength="18" value="Player" placeholder="Enter your name" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ddlDifficulty">Difficulty</label>
+                        <select id="ddlDifficulty" class="input-control">
+                            <option value="Easy">Easy (Relaxed)</option>
+                            <option value="Normal" selected>Normal (Classic)</option>
+                            <option value="Hard">Hard (Fast)</option>
+                            <option value="Insane">Insane (Turbo)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <input id="chkWrapWalls" type="checkbox" />
+                        <label for="chkWrapWalls">Wrap-around walls (pass through edges)</label>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="btnNewGame" type="button" class="btn btn-primary" onclick="SnakeApp.startGame();">New Game</button>
+                        <button id="btnPause" type="button" class="btn btn-secondary" onclick="SnakeApp.togglePause();">Pause</button>
+                    </div>
+                </div>
+
+                <div class="panel-card leaderboard-card">
+                    <div class="leaderboard-header">
+                        <h2>Top 10 Leaderboard</h2>
+                        <button id="btnClearScores" type="button" class="btn btn-ghost" onclick="SnakeApp.clearScores();">Clear</button>
+                    </div>
+
+                    <table class="leaderboard-table" aria-label="Top 10 Leaderboard">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>Score</th>
+                                <th>Level</th>
+                                <th>Walls</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardBody">
+                            <tr>
+                                <td colspan="5" class="empty-row">Loading scores...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="/js/snake.js" type="text/javascript"></script>
+</body>
+</html>

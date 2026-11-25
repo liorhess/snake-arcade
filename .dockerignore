@@ -1,0 +1,12 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/App_Data
+**/*.user
+**/*.suo
+.env
+.env.*
+README.md
